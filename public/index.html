@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Game Characters API</title>
+</head>
+
+<body>
+
+  <h1>Game Characters List</h1>
+
+  <button onclick="loadCharacters()">Display Characters</button>
+
+  <ul id="list"></ul>
+
+  <h1>Add Character</h1>
+
+  <input type="text" id="name" placeholder="Character Name" />
+  <input type="text" id="role" placeholder="Role" />
+  <input type="text" id="difficulty" placeholder="Difficulty" />
+  <button onclick="addCharacter()">Submit</button>
+
+<script>
+
+const API = "/characters";
+
+/* LOAD CHARACTERS */
+async function loadCharacters() {
+  const res = await fetch(API);
+  const data = await res.json();
+
+  const list = document.getElementById("list");
+  list.innerHTML = "";
+
+  data.forEach(character => {
+    const li = document.createElement("li");
+
+    li.innerHTML = `
+      <span>
+        NAME: ${character.name || "N/A"} |
+        ROLE: ${character.role || "N/A"} |
+        DIFFICULTY: ${character.difficulty || "N/A"}
+      </span>
+
+      <span>
+        <button onclick="editCharacter(${character.id})">Edit</button>
+        <button onclick="deleteCharacter(${character.id})">Delete</button>
+      </span>
+    `;
+
+    list.appendChild(li);
+  });
+}
+
+/* ADD */
+async function addCharacter() {
+  const name = document.getElementById("name").value;
+  const role = document.getElementById("role").value;
+  const difficulty = document.getElementById("difficulty").value;
+
+  await fetch(API, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ name, role, difficulty })
+  });
+
+  loadCharacters();
+}
+
+/* DELETE */
+async function deleteCharacter(id) {
+  await fetch(`${API}/${id}`, { method: "DELETE" });
+  loadCharacters();
+}
+
+/* UPDATE */
+async function editCharacter(id) {
+  const name = prompt("Enter new name:");
+  const role = prompt("Enter new role:");
+  const difficulty = prompt("Enter new difficulty:");
+
+  await fetch(`${API}/${id}`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ name, role, difficulty })
+  });
+
+  loadCharacters();
+}
+
+</script>
+
+</body>
+</html>
