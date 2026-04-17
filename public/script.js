@@ -1,84 +1,113 @@
-const API = "/products";
-const $ = id => document.getElementById(id);
 
-// RENDER
-function renderList(data) {
-  const list = $("list");
-  list.innerHTML = "";
+// ================= LOAD PRODUCTS =================
+async function loadProducts() {
+  const res = await fetch('http://localhost:3000/products');
+  const data = await res.json();
 
-  if (!data.length) {
+  const list = document.getElementById('list');
+  list.innerHTML = '';
+
+  if (data.length === 0) {
     list.innerHTML = "<li>No products found</li>";
     return;
   }
 
-  data.forEach(p => {
-    const li = document.createElement("li");
+  data.forEach((p) => {
+    const li = document.createElement('li');
 
-    li.innerHTML = `
-      <span>
-        <b>${p.name}</b> | ${p.category} | ₱${p.price} | Stock: ${p.stock}
-      </span>
-      <span>
-        <button onclick="editProduct(${p.id})">Edit</button>
-        <button onclick="deleteProduct(${p.id})">Delete</button>
-      </span>
-    `;
+    li.textContent =
+      `NAME: ${p.name} | CATEGORY: ${p.category} | PRICE: ${p.price} | STOCK: ${p.stock}`;
+
+    // buttons container
+    const btnEdit = document.createElement('button');
+    btnEdit.textContent = "Edit";
+    btnEdit.onclick = () => editProduct(p.id);
+
+    const btnDelete = document.createElement('button');
+    btnDelete.textContent = "Delete";
+    btnDelete.onclick = () => deleteProduct(p.id);
+
+    li.appendChild(document.createElement('br'));
+    li.appendChild(btnEdit);
+    li.appendChild(btnDelete);
 
     list.appendChild(li);
   });
 }
 
-// LOAD
-async function loadProducts() {
-  const res = await fetch(API);
-  renderList(await res.json());
-}
 
-// SEARCH
-async function searchProduct() {
-  const q = $("searchInput").value;
-  if (!q) return alert("Enter product name");
-
-  const res = await fetch(`/search?name=${encodeURIComponent(q)}`);
-  renderList(await res.json());
-}
-
-// ADD
+// ================= ADD PRODUCT =================
 async function addProduct() {
-  await fetch(API, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      name: $("name").value,
-      category: $("category").value,
-      price: +$("price").value,
-      stock: +$("stock").value
-    })
+  const name = document.getElementById('name').value;
+  const category = document.getElementById('category').value;
+  const price = document.getElementById('price').value;
+  const stock = document.getElementById('stock').value;
+
+  const res = await fetch('http://localhost:3000/products', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({ name, category, price, stock })
   });
+
+  const data = await res.json();
+  console.log(data);
 
   loadProducts();
 }
 
-// DELETE
+
+// ================= DELETE PRODUCT =================
 async function deleteProduct(id) {
-  await fetch(`${API}/${id}`, { method: "DELETE" });
-  loadProducts();
-}
-
-// EDIT
-async function editProduct(id) {
-  const data = {
-    name: prompt("New name:"),
-    category: prompt("New category:"),
-    price: +prompt("New price:"),
-    stock: +prompt("New stock:")
-  };
-
-  await fetch(`${API}/${id}`, {
-    method: "PUT",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(data)
+  await fetch(`http://localhost:3000/products/${id}`, {
+    method: 'DELETE'
   });
 
   loadProducts();
+}
+
+
+// ================= EDIT PRODUCT =================
+async function editProduct(id) {
+  const name = prompt("New name:");
+  const category = prompt("New category:");
+  const price = prompt("New price:");
+  const stock = prompt("New stock:");
+
+  await fetch(`http://localhost:3000/products/${id}`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({ name, category, price, stock })
+  });
+
+  loadProducts();
+}
+
+
+// ================= SEARCH PRODUCT =================
+async function searchProduct() {
+  const name = document.getElementById('searchInput').value;
+
+  if (!name) {
+    alert("Enter product name");
+    return;
+  }
+
+  const res = await fetch(`http://localhost:3000/search?name=${name}`);
+  const data = await res.json();
+
+  const list = document.getElementById('list');
+  list.innerHTML = '';
+
+  data.forEach((p) => {
+    const li = document.createElement('li');
+
+    li.textContent =
+      `NAME: ${p.name} | CATEGORY: ${p.category} | PRICE: ${p.price} | STOCK: ${p.stock}`;
+
+    list.appendChild(li);
+  });
 }
