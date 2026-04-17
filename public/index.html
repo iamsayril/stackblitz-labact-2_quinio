@@ -2,94 +2,44 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Game Characters API</title>
+  <title>Product Inventory System</title>
+
+  <!-- CSS -->
+  <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
 
-  <h1>Game Characters List</h1>
+<h1>📦 Product Inventory System</h1>
 
-  <button onclick="loadCharacters()">Display Characters</button>
+<button onclick="loadProducts()">Load Products</button>
 
-  <ul id="list"></ul>
+<hr>
 
-  <h1>Add Character</h1>
+<h2>🔍 Search Product</h2>
 
-  <input type="text" id="name" placeholder="Character Name" />
-  <input type="text" id="role" placeholder="Role" />
-  <input type="text" id="difficulty" placeholder="Difficulty" />
-  <button onclick="addCharacter()">Submit</button>
+<div class="search-box">
+  <input id="searchInput" placeholder="Enter product name">
+  <button onclick="searchProduct()">Search</button>
+  <button onclick="loadProducts()">Reset</button>
+</div>
 
-<script>
+<hr>
 
-const API = "/characters";
+<ul id="list"></ul>
 
-/* LOAD CHARACTERS */
-async function loadCharacters() {
-  const res = await fetch(API);
-  const data = await res.json();
+<hr>
 
-  const list = document.getElementById("list");
-  list.innerHTML = "";
+<h2>➕ Add Product</h2>
 
-  data.forEach(character => {
-    const li = document.createElement("li");
+<input id="name" placeholder="Product Name">
+<input id="category" placeholder="Category">
+<input id="price" placeholder="Price">
+<input id="stock" placeholder="Stock">
+<button onclick="addProduct()">Add</button>
 
-    li.innerHTML = `
-      <span>
-        NAME: ${character.name || "N/A"} |
-        ROLE: ${character.role || "N/A"} |
-        DIFFICULTY: ${character.difficulty || "N/A"}
-      </span>
-
-      <span>
-        <button onclick="editCharacter(${character.id})">Edit</button>
-        <button onclick="deleteCharacter(${character.id})">Delete</button>
-      </span>
-    `;
-
-    list.appendChild(li);
-  });
-}
-
-/* ADD */
-async function addCharacter() {
-  const name = document.getElementById("name").value;
-  const role = document.getElementById("role").value;
-  const difficulty = document.getElementById("difficulty").value;
-
-  await fetch(API, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ name, role, difficulty })
-  });
-
-  loadCharacters();
-}
-
-/* DELETE */
-async function deleteCharacter(id) {
-  await fetch(`${API}/${id}`, { method: "DELETE" });
-  loadCharacters();
-}
-
-/* UPDATE */
-async function editCharacter(id) {
-  const name = prompt("Enter new name:");
-  const role = prompt("Enter new role:");
-  const difficulty = prompt("Enter new difficulty:");
-
-  await fetch(`${API}/${id}`, {
-    method: "PUT",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ name, role, difficulty })
-  });
-
-  loadCharacters();
-}
-
-</script>
+<!-- JS -->
+<script src="script.js"></script>
 
 </body>
 </html>
